@@ -19,19 +19,9 @@ import java.util.Optional;
 
 @Component
 public class JwtAuthFilter implements WebFilter {
-
-    public JwtAuthFilter() {
-        System.out.println("BEAN UAS INIT");
-    }
-
     private static final String SECRET_KEY = "thisissecretykeyformyaccesssecreytokenthatiwilluseinproduciton";
 
-
-    //private final SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET_KEY));
-
     private final SecretKey accessKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET_KEY));
-
-
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
@@ -39,13 +29,10 @@ public class JwtAuthFilter implements WebFilter {
         String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            System.out.println("❌ Fără Bearer Token! Trimit 401");
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
-
         String token = authHeader.substring(7);
-        System.out.println("🔹 Token primit: " + token);
 
         try {
             Claims claims = Jwts.parser()
@@ -55,19 +42,14 @@ public class JwtAuthFilter implements WebFilter {
                     .getPayload();
 
             String email = claims.getSubject();
-            System.out.println("✅ Token valid! Utilizator: " + email);
-
             ServerHttpRequest mutatedRequest = exchange.getRequest()
                     .mutate()
                     .header("X-User-Email", email)
                     .build();
-
             return chain.filter(exchange.mutate().request(mutatedRequest).build());
         } catch (Exception e) {
-            System.out.println("❌ JWT invalid: " + e.getMessage());
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
     }
-
 }

@@ -21,7 +21,6 @@ import java.util.Objects;
 
 @Configuration
 public class SecurityConfig {
-
     private static final String SECRET_KEY = "thisissecretykeyformyaccesssecreytokenthatiwilluseinproduciton";
     private final SecretKey accessKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET_KEY));
 
@@ -30,8 +29,8 @@ public class SecurityConfig {
         http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers("/auth/**").permitAll() // Permite acces liber la autentificare
-                        .anyExchange().authenticated() // Orice alt request trebuie să fie autenticat
+                        .pathMatchers("/auth/**").permitAll()
+                        .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtDecoder(jwtDecoder())
